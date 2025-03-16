@@ -1,1 +1,5 @@
 *.pyc
+test_train_split
+wandb
+tmp_fbcpr
+*.egg-info

@@ -216,7 +216,8 @@ class Workspace:
         start_time = time.time()
         fps_start_time = time.time()
         for t in range(0, self.cfg.num_env_steps, self.cfg.online_parallel_envs):
-            if self.cfg.evaluate and t % self.cfg.eval_every_steps == 0:
+            if self.cfg.evaluate and t % self.cfg.eval_every_steps == 0 and t:
+            # if self.cfg.evaluate and t % self.cfg.eval_every_steps == 0:
                 eval_metrics = self.eval(t, replay_buffer=replay_buffer)
                 if self.cfg.prioritization:
                     # priorities
@@ -328,7 +329,7 @@ class Workspace:
         print(f"Starting evaluation at time {t}")
         inference_function: str = "reward_wr_inference"
 
-        self.agent._model.to("cpu")
+        self.agent._model.to("cpu")  # Eval need it
         self.agent._model.train(False)
 
         # ---------------------------------------------------------------
@@ -373,6 +374,7 @@ class Workspace:
         # ---------------------------------------------------------------
         # Tracking evaluation
         # ---------------------------------------------------------------
+        tracking_metrics = {}
         eval_agent = TrackingWrapper(model=self.agent._model)
         tracking_eval = TrackingEvaluation(
             motions=self.cfg.tracking_eval_motions,
@@ -405,7 +407,7 @@ class Workspace:
         # ---------------------------------------------------------------
         # this is important, move back the agent to cuda and
         # restart the training
-        self.agent._model.to("cuda")
+        self.agent._model.to(self.cfg.device)
         self.agent._model.train()
 
         return {"reward": reward_metrics, "tracking": tracking_metrics}

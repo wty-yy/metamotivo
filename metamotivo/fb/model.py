@@ -89,7 +89,8 @@ class FBModel(nn.Module):
     def to(self, *args, **kwargs):
         device, _, _, _ = torch._C._nn._parse_to(*args, **kwargs)
         if device is not None:
-            self.cfg.device = device.type  # type: ignore
+            # To make model and data on same cuda index, when use cuda:2
+            self.cfg.device = f"{device.type}" + ("" if device.index is None else f":{device.index}")  # type: ignore
         return super().to(*args, **kwargs)
 
     @classmethod
